@@ -24,7 +24,7 @@ while True:
 
 #Rules
 if Rules == "yes":
-    print("The game is played with numbers starting from 1-10.\nThe batter must type a value between 1-10 and hope that the bowler didn't type the same otherwise they are out!\nIt first starts with a toss and the victor chooses wether to bat or bowl.\nThe bowler tries to defeat the batter by predicting the number he is about to type.\nFor every ball, the number typed by the batter would be added to the total score.\nUser with highest score wins!")
+    print("The game is played with numbers starting from 1-10.\nThe batter must type a value between 1-10 and hope that the bowler didn't type the same otherwise they are out!\n           It first starts with a toss and the victor chooses wether to bat or bowl.\nThe bowler tries to defeat the batter by predicting the number he is about to type.\nFor every ball, the number typed by the batter would be added to the total score.\nUser with highest score wins!")
 
 
 # Confirmation to play the game
@@ -232,7 +232,7 @@ if choice == "yes":
         else:
             restart = 0
             print("Bye!")
-#Funny            
+#I wonder why            
 else:
     print("Why even bother?")
                
