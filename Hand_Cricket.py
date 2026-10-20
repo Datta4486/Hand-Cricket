@@ -3,18 +3,23 @@ from pyfiglet import Figlet
 from colorama import Fore, Style
 f = Figlet(font="banner3-D")
 
+debug = 0
+
+botBowlProbability = [0.1] * 10
+botBatProbability = [0.1] * 10
+
 def gameFunction(playerScore,botScore,side,innings):
     #If side is 0, player is first batting and vice-versa if side is 1
 
     #Player Batting side
     if side == 0:
-        print("You are now batting!")
+        print("\nYou are now batting!")
         while (True):
-            if innings == 2:
+            if innings == 2: #When it is the second inning, 
                 if playerScore > botScore:
                     return playerScore
 
-            botBall = random.randrange(1,11,1)
+            botBall = random.choices(population=range(1,11),weights=botBowlProbability,k=1)[0]
 
             while True:
                 try:
@@ -26,8 +31,11 @@ def gameFunction(playerScore,botScore,side,innings):
                 except ValueError:
                     print("Invalid input. Make sure you are inputting an integer and between 1-10.")
 
+            probabilityUpdate(playerToss=playerBall,side=0)
+
             # ASCII text
             concat_txt = str(playerBall) + "-" + str(botBall)
+            print("\n\n")
             if playerBall != botBall: #Not a wicket
                 print(Fore.GREEN + f.renderText(concat_txt))
                 print(Style.RESET_ALL + "You hit",playerBall, "while the bot bowled",botBall)
@@ -41,13 +49,15 @@ def gameFunction(playerScore,botScore,side,innings):
         return playerScore
 
     if side == 1:
-        print("You are now bowling!")
+        print("\n\n\nYou are now bowling!")
         while (True):
 
             if innings == 2:
                 if botScore > playerScore:
                     return botScore
-            botBall = random.randrange(1,11,1)
+
+            botBall = random.choices(population=range(1,11),weights=botBatProbability,k = 1)[0]
+
             while True:
                 try:
                     playerBall = int(input("Enter the number:"))
@@ -58,8 +68,11 @@ def gameFunction(playerScore,botScore,side,innings):
                 except ValueError:
                     print("Invalid input. Make sure you are inputting an integer and between 1-10.")
 
+            probabilityUpdate(playerToss=playerBall,side=1)
+
             # ASCII text
             concat_txt = str(playerBall) + "-" + str(botBall)
+            print("\n\n")
             if playerBall != botBall: # Not a wicket
                 print(Fore.RED + f.renderText(concat_txt))
                 print(Style.RESET_ALL + "You bowled",playerBall, "while the bot hit",botBall)
@@ -72,9 +85,52 @@ def gameFunction(playerScore,botScore,side,innings):
 
         return botScore
 
+def normalization(probabilityList): #Whenever probabilityUpdate function changes, the values of the probabilityList may not be normalized (sum is equal to 1). 
+
+    total = sum(probabilityList)
+    for index , probability in enumerate(probabilityList):
+        probabilityList[index] = probability / total
+
+    return probabilityList
+
+def probabilityUpdate(playerToss,side):
+    learning_rate = 0.1
+    global botBowlProbability
+    global botBatProbability
+    global debug
+
+    if(side == 0):
+        botBowlProbability[playerToss - 1] += learning_rate
+        botBowlProbability = normalization(botBowlProbability)
+        if(debug):
+            print("Bowl Probability:", end = " ")
+            test = [round(value,4) for value in botBowlProbability]
+            print(test)
+    else:
+        botBatProbability[playerToss - 1] *= (1 - learning_rate)
+        botBatProbability = normalization(botBatProbability)
+
+        if(debug):
+            print("Bat Probability:", end = " ")
+            test = [round(value,4) for value in botBatProbability]
+            print(test)
+
+
+print("Would you like to enable debug mode?" \
+"\nType either 0 or 1.")
+
+while True:
+    debug = int(input())
+    if debug in [0,1]:
+        break
+    else:
+        print("Invalid Choice. Type either 0 or 1.")
 
 # Introduction
-print("Welcome to my second attempt at creating a barely functioning game in Python.\nThis time it is Hand-Cricket... well, you aren't really using ur hands to play this game so it's just RNG Cricket.\nWould you like to hear the rules first? \nType 'Yes' or 'No'...")
+print("\n\nWelcome to my second attempt at creating a barely functioning game in Python." \
+"\nThis time it is an implementation of Hand Cricket... well, you aren't really using your hands to make gestures so it's just RNG Cricket." \
+"\nWould you like to know how to play this game?" \
+"\nType 'Yes' or 'No'...")
 
 #Score variable initialization
 playerScore = 0
@@ -83,19 +139,25 @@ botScore = 0
 
 # Typocheck for option from user
 while True:
-    Rules = str(input("").lower())
-    if Rules in ["yes","no"]:
+    tutorial = str(input("").lower())
+    if tutorial in ["yes","no"]:
         break
     else:
         print("Invalid Choice. Type either Yes or No.")
 
-#Rules
-if Rules == "yes":
-    print("The game is played with numbers starting from 1-10.\nThe batter must type a value between 1-10 and hope that the bowler didn't type the same otherwise they are out!\n           It first starts with a toss and the victor chooses wether to bat or bowl.\nThe bowler tries to defeat the batter by predicting the number he is about to type.\nFor every ball, the number typed by the batter would be added to the total score.\nUser with highest score wins!")
+#Tutorial
+if tutorial == "yes":
+    print("\n\nThe game is played with numbers starting from 1-10." \
+    "\nThe batter must type a value between 1-10 and hope that the bowler didn't type the same otherwise they are out!" \
+    "\nIt first starts with a toss and the victor chooses whether to bat or bowl." \
+    "\nThe bowler tries to defeat the batter by predicting the number he is about to type." \
+    "\nFor every ball, the number typed by the batter would be added to the total score."\
+    "\nUser with highest score wins!")
 
 
 # Confirmation to play the game
-print("Would you like to play a game?\nAs usual type 'Yes' or 'No'...")
+print("\n\nWould you like to play a game?" \
+      "\nAs usual type 'Yes' or 'No'...")
 
 # User Confirmation TypoCheck
 while True:
@@ -112,7 +174,7 @@ if choice == "no":
 
 #Heart and soul of the program
 while (True):
-    print("Well, time to toss. Heads or Tails?")
+    print("\n\nWell, time to toss. Heads or Tails?")
     
     #Coinflip input typocheck
     while True:
@@ -132,6 +194,7 @@ while (True):
     tosswin = random.choice(["heads","tails"])
     
     #  Branch where user won the coin toss
+    print("\n\n")
     if coinflip == tosswin:
         print("Yay, you won the toss, you can choose either batting or bowling.\nPress 1 to bat or press 2 to bowl")
         
@@ -156,7 +219,7 @@ while (True):
             playerside = 1
 
     # Inning ONE        
-    print("Inning 1!")
+    print("\n\n\n\nInning 1!")
 
     # Player batting Inning 1
     if playerside == 1:
@@ -170,7 +233,7 @@ while (True):
     
 
     # Inning 2
-    print("Inning 2!")
+    print("\n\n\n\nInning 2!")
 
     #Player Batting Inning 2    
     if playerside == 1:
@@ -190,7 +253,7 @@ while (True):
         print(Fore.LIGHTYELLOW_EX + "Tie!")
 
     #Message asking user if they want to replay
-    print(Style.RESET_ALL + "Would you like to play again?")
+    print(Style.RESET_ALL + "\n\nWould you like to play again?")
 
     #Typocheck
     while True:
@@ -203,5 +266,5 @@ while (True):
     if replay== "yes":
         botScore = playerScore = 0
     else:
-        print("Bye!")
+        print("\nBye!")
         break
